@@ -17,7 +17,7 @@ interface FormFieldProps<T extends FieldValues> {
 	type?: "text" | "email" | "password" | "file";
 }
 
-function FormField({
+function FormField<T extends FieldValues>({
 	control,
 	name,
 	label,
