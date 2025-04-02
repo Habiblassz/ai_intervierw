@@ -1,5 +1,6 @@
 "use client";
 import { interviewer } from "@/constants";
+import { createFeedback } from "@/lib/actions/general.action";
 //Because the agent is rendered on the client side
 import { cn } from "@/lib/utils";
 import { vapi } from "@/lib/vapi.sdk";
@@ -63,7 +64,11 @@ function Agent({ userName, userId, type, interviewId, questions }: AgentProps) {
 
 	const handleGenerateFeeback = async (messages: SavedMessage[]) => {
 		console.log("Generate feedback here!");
-		const { success, id } = { success: true, id: "feedbackID" };
+		const { success, feedbackId: id } = await createFeedback({
+			interviewId: interviewId!,
+			userId: userId!,
+			transcript: messages,
+		});
 
 		if (success && id) {
 			router.push(`/interview/${interviewId}/feedback`);
