@@ -7,8 +7,7 @@ import Link from "next/link";
 import DisplayTechIcons from "./DisplayTechIcons";
 
 function InterviewCard({
-	interviewId,
-	userId,
+	id,
 	role,
 	type,
 	techstack,
@@ -53,11 +52,7 @@ function InterviewCard({
 			<div className="flex flex-row justify-between">
 				<DisplayTechIcons techStack={techstack} />
 				<Link
-					href={
-						feedback
-							? `/interview/${interviewId}/feedback`
-							: `/interview/${interviewId}`
-					}>
+					href={feedback ? `/interview/${id}/feedback` : `/interview/${id}`}>
 					<Button className="btn-primary">
 						{feedback ? "View Feedback" : "Start Interview"}
 					</Button>

@@ -1,10 +1,10 @@
 import InterviewCard from "@/components/InterviewCard";
 import { Button } from "@/components/ui/button";
+import { getCurrentUser } from "@/lib/actions/auth.action";
 import {
-	getCurrentUser,
 	getInterviewsByUserId,
 	getLatestInterviews,
-} from "@/lib/actions/auth.action";
+} from "@/lib/actions/general.action";
 import Link from "next/link";
 
 async function Home() {
