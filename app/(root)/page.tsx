@@ -10,13 +10,13 @@ import Link from "next/link";
 async function Home() {
 	const user = await getCurrentUser();
 
-	const [userInterviews, latestInterviews] = await Promise.all([
+	const [userInterviews, allInterviews] = await Promise.all([
 		await getInterviewsByUserId(user?.id!),
 		await getLatestInterviews({ userId: user?.id! }),
 	]);
 
 	const hasPassesdInterviews = userInterviews?.length! > 0;
-	const hasUpcomingInterviews = latestInterviews?.length! > 0;
+	const hasUpcomingInterviews = allInterviews?.length! > 0;
 
 	return (
 		<>
@@ -43,7 +43,15 @@ async function Home() {
 				<div className="interviews-section">
 					{hasPassesdInterviews ? (
 						userInterviews?.map((interview) => (
-							<InterviewCard {...interview} key={interview.id} />
+							<InterviewCard
+								key={interview.id}
+								userId={user?.id}
+								interviewId={interview.id}
+								role={interview.role}
+								techstack={interview.techstack}
+								type={interview.type}
+								createdAt={interview.createdAt}
+							/>
 						))
 					) : (
 						<p>You haven&apos;t taken any inteviews yet</p>
@@ -54,8 +62,16 @@ async function Home() {
 				<h2>Take an Interview</h2>
 				<div className="interviews-section">
 					{hasUpcomingInterviews ? (
-						latestInterviews?.map((interview) => (
-							<InterviewCard {...interview} key={interview.id} />
+						allInterviews?.map((interview) => (
+							<InterviewCard
+								key={interview.id}
+								userId={user?.id}
+								interviewId={interview.id}
+								role={interview.role}
+								techstack={interview.techstack}
+								type={interview.type}
+								createdAt={interview.createdAt}
+							/>
 						))
 					) : (
 						<p>There are no new interviews available</p>

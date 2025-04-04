@@ -1,3 +1,4 @@
+"use server"; // this file is rendered on the server
 import { feedbackSchema } from "@/constants";
 import { db } from "@/firebase/admin";
 import { google } from "@ai-sdk/google";
@@ -44,7 +45,7 @@ export async function getLatestInterviews(
 }
 
 export async function createFeedback(params: CreateFeedbackParams) {
-	const { interviewId, userId, transcript } = params;
+	const { interviewId, userId, transcript, feedbackId } = params;
 
 	try {
 		const formattedTranscript = transcript
@@ -54,15 +55,7 @@ export async function createFeedback(params: CreateFeedbackParams) {
 			)
 			.join("");
 
-		const {
-			object: {
-				totalScore,
-				categoryScores,
-				strengths,
-				areasForImprovement,
-				finalAssessment,
-			},
-		} = await generateObject({
+		const { object } = await generateObject({
 			model: google("gemini-2.0-flash-001", { structuredOutputs: false }),
 			schema: feedbackSchema,
 			prompt: `
@@ -81,20 +74,30 @@ export async function createFeedback(params: CreateFeedbackParams) {
 				"You are a professional interviewer analyzing a mock interview. Your task is to evaluate the candidate based on structured categories",
 		});
 
-		const feedback = await db.collection("feedback").add({
+		const feedback = {
 			interviewId,
 			userId,
-			totalScore,
-			categoryScores,
-			strengths,
-			areasForImprovement,
-			finalAssessment,
+			totalScore: object.totalScore,
+			categoryScores: object.categoryScores,
+			strengths: object.strengths,
+			areasForImprovement: object.areasForImprovement,
+			finalAssessment: object.finalAssessment,
 			createdAt: new Date().toISOString(),
-		});
+		};
+
+		let feedbackRef;
+
+		if (feedbackId) {
+			feedbackRef = db.collection("feedback").doc(feedbackId);
+			await feedbackRef.update(feedback);
+		} else {
+			feedbackRef = db.collection("feedback").doc();
+			await feedbackRef.set(feedback);
+		}
 
 		return {
 			success: true,
-			feedbackId: feedback.id,
+			feedbackId: feedbackRef.id,
 		};
 	} catch (e) {
 		console.error("Error saving feedback ", e);
@@ -121,6 +124,6 @@ export async function getFeedbackByInterviewId(
 	const feedbackDoc = feedback.docs[0];
 	return {
 		id: feedbackDoc.id,
-		...feedbackDoc.data,
+		...feedbackDoc.data(),
 	} as Feedback;
 }

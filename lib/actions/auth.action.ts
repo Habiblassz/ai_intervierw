@@ -25,7 +25,7 @@ export async function signUp(params: SignUpParams) {
 			message: "Account created successfully. Please sign in",
 		};
 	} catch (error: any) {
-		console.log("Error creating user", error);
+		console.error("Error creating user", error);
 		if (error.code === "auth/email-already-exists") {
 			return {
 				succcess: false,
@@ -62,6 +62,11 @@ export async function signIn(params: SignInParams) {
 	}
 }
 
+export async function signOut() {
+	const cookieStore = await cookies();
+	cookieStore.delete("session");
+}
+
 export async function setSessionCookie(idToken: string) {
 	const cookieStore = await cookies();
 
@@ -81,9 +86,7 @@ export async function setSessionCookie(idToken: string) {
 export async function getCurrentUser(): Promise<User | null> {
 	const cookieStore = await cookies();
 	const sessionCookie = cookieStore.get("session")?.value;
-	if (!sessionCookie) {
-		return null;
-	}
+	if (!sessionCookie) return null;
 	try {
 		const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
 		const userRecord = await db
@@ -91,9 +94,7 @@ export async function getCurrentUser(): Promise<User | null> {
 			.doc(decodedClaims.uid)
 			.get();
 
-		if (!userRecord.exists) {
-			return null;
-		}
+		if (!userRecord.exists) return null;
 
 		return {
 			...userRecord.data(),
