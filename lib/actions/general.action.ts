@@ -28,14 +28,14 @@ export async function getInterviewById(id: string): Promise<Interview | null> {
 export async function getLatestInterviews(
 	params: GetLatestInterviewsParams
 ): Promise<Interview[] | null> {
-	const { userId, limit = 20 } = params;
+	const { userId } = params;
 
 	const interviews = await db
 		.collection("interviews")
 		.orderBy("createdAt", "desc")
 		.where("finalized", "==", true)
 		.where("userId", "!=", userId)
-		.limit(limit)
+		.limit(20)
 		.get();
 
 	return interviews.docs.map((doc) => ({
@@ -75,8 +75,8 @@ export async function createFeedback(params: CreateFeedbackParams) {
 		});
 
 		const feedback = {
-			interviewId,
-			userId,
+			interviewId: interviewId,
+			userId: userId,
 			totalScore: object.totalScore,
 			categoryScores: object.categoryScores,
 			strengths: object.strengths,
@@ -94,6 +94,8 @@ export async function createFeedback(params: CreateFeedbackParams) {
 			feedbackRef = db.collection("feedback").doc();
 			await feedbackRef.set(feedback);
 		}
+
+		await feedbackRef.set(feedback);
 
 		return {
 			success: true,

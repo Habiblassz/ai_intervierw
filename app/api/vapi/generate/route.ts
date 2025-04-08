@@ -41,6 +41,7 @@ export async function POST(request: Request) {
 		};
 
 		await db.collection("interviews").add(interview);
+		console.log("Your interview has been generated", interview);
 
 		return Response.json({ success: true }, { status: 200 });
 	} catch (error) {
