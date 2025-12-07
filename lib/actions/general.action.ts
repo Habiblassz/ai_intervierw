@@ -3,6 +3,7 @@ import { feedbackSchema } from "@/constants";
 import { db } from "@/firebase/admin";
 import { google } from "@ai-sdk/google";
 import { generateObject } from "ai";
+import { Timestamp } from "firebase-admin/firestore";
 
 export async function getInterviewsByUserId(
 	userId: string
@@ -82,20 +83,21 @@ export async function createFeedback(params: CreateFeedbackParams) {
 			strengths: object.strengths,
 			areasForImprovement: object.areasForImprovement,
 			finalAssessment: object.finalAssessment,
-			createdAt: new Date().toISOString(),
+			createdAt: Timestamp.now(),
 		};
 
 		let feedbackRef;
 
 		if (feedbackId) {
 			feedbackRef = db.collection("feedback").doc(feedbackId);
+			console.log("feedbackRef", feedbackRef);
 			await feedbackRef.update(feedback);
 		} else {
 			feedbackRef = db.collection("feedback").doc();
 			await feedbackRef.set(feedback);
 		}
 
-		await feedbackRef.set(feedback);
+		// await feedbackRef.set(feedback);
 
 		return {
 			success: true,
